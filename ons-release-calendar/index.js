@@ -14,14 +14,16 @@ const fetchOptions = {
     cache: 'default' 
 };
 
-const getReleases = (date) => {
+const getReleases = (date, isUpcoming) => {
     const fromDate = date;
     const toDate = new Date(date.getTime() + (24 * 60 * 60 * 1000));
-    const fromDateParams = `fromDateDay=${fromDate.getDay()}&fromDateMonth=${fromDate.getMonth()}&fromDateYear=${fromDate.getFullYear()}`;
-    const toDateParams = `toDateDay=${toDate.getDay()}&toDateMonth=${toDate.getMonth()}&toDateYear=${toDate.getFullYear()}`;
+    const fromDateParams = `fromDateDay=${fromDate.getDate()}&fromDateMonth=${fromDate.getMonth()+1}&fromDateYear=${fromDate.getFullYear()}`;
+    const toDateParams = `toDateDay=${toDate.getDate()}&toDateMonth=${toDate.getMonth()+1}&toDateYear=${toDate.getFullYear()}`;
 
     return new Promise((resolve, reject) => {
-        fetch(`https://www.ons.gov.uk/releasecalendar/data?${fromDateParams}&${toDateParams}`, fetchOptions, (error, _, response) => {
+        const url = `https://www.ons.gov.uk/releasecalendar/data?${fromDateParams}&${toDateParams}&${isUpcoming ? "view=upcoming" : ""}`;
+        console.log("Fetching for URL: ", url);
+        fetch(url, fetchOptions, (error, _, response) => {
             if (error) {
                 reject(error);
                 return;
@@ -39,7 +41,7 @@ exports.handler = (_, context, callback) => {
     const todaysDate = new Date();
     const tomorrowsDate = new Date(todaysDate.getTime() + (24 * 60 * 60 * 1000));
     const todaysReleases = getReleases(todaysDate);
-    const tomorrowsReleases = getReleases(tomorrowsDate);
+    const tomorrowsReleases = getReleases(tomorrowsDate, true);
 
     function mapResponseToRelease(response) {
         try {
@@ -59,7 +61,6 @@ exports.handler = (_, context, callback) => {
     }
 
     Promise.all([todaysReleases, tomorrowsReleases]).then(responses => {
-        console.log(responses);
         const releases = {
             today: responses[0].result.results.map(release => {
                 return mapResponseToRelease(release)
@@ -71,7 +72,6 @@ exports.handler = (_, context, callback) => {
         Firebase.database().ref().child("releases")
             .set(releases)
             .then(function (releases) {
-                console.log('Firebase data: ', releases);
                 context.succeed();                  // important that you don't call succeed until you are called back otherwise nothing will be saved to the database!
             })
             .catch(function (error) {
