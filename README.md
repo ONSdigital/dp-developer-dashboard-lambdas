@@ -1,6 +1,6 @@
 # dp-developer-dashboard-lambdas
 
-> Collection of lambda function that get data and updated a firebase database with information for [develop dashboard frontend](https://github.com/ONSdigital/dp-developer-dashboard-frontend) to display.
+> Collection of lambda function that get data and updated a firebase database with information for [developer dashboard frontend](https://github.com/ONSdigital/dp-developer-dashboard-frontend) to display.
 
 ## Running
 
