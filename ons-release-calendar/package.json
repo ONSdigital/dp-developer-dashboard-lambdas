@@ -1,0 +1,27 @@
+{
+  "name": "ons-release-calendar",
+  "version": "0.0.1",
+  "description": "Lambda function for getting ONS releases for today and tomorrow",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lambda": "lambda-local -l index.js -e event.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ONSdigital/dp-developer-dashboard-lambdas.git"
+  },
+  "author": "Crispin Merriman",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ONSdigital/dp-developer-dashboard-lambdas/issues"
+  },
+  "homepage": "https://github.com/ONSdigital/dp-developer-dashboard-lambdas#readme",
+  "dependencies": {
+    "fetch": "^1.1.0",
+    "firebase": "^4.6.2"
+  },
+  "devDependencies": {
+    "lambda-local": "^1.4.4"
+  }
+}
