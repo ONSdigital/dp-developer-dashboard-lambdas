@@ -21,7 +21,7 @@ const getReleases = (date, isUpcoming) => {
     const toDateParams = `toDateDay=${toDate.getDate()}&toDateMonth=${toDate.getMonth()+1}&toDateYear=${toDate.getFullYear()}`;
 
     return new Promise((resolve, reject) => {
-        const url = `https://www.ons.gov.uk/releasecalendar/data?${fromDateParams}&${toDateParams}&${isUpcoming ? "view=upcoming" : ""}`;
+        const url = `https://www.ons.gov.uk/releasecalendar/data?${fromDateParams}&${toDateParams}&view=upcoming`;
         console.log("Fetching for URL: ", url);
         fetch(url, fetchOptions, (error, _, response) => {
             if (error) {
