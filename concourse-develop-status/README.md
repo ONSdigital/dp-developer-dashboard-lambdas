@@ -1,4 +1,4 @@
-# ons-release-calendar
+# concourse-develop-status
 
 > Fetches data from our Concourse API to populate build statuses for the develop environments.
 
@@ -12,5 +12,5 @@ npm install
 ```
 2) Run the function:
 ```
-FIREBASE_KEY=<firebase api key> FIREBASE_DB_NAME=<firebase db name> npm run lambda
+FIREBASE_KEY=<firebase api key> FIREBASE_DB_NAME=<firebase db name> BUILD=dev npm run lambda
 ```

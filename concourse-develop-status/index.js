@@ -61,6 +61,10 @@ exports.handler = (_, context, callback) => {
                             job.name === ("cmd-develop-build")
                             ||
                             job.name === ("develop-build")
+                            ||
+                            job.name === ("cmd-master-build")
+                            ||
+                            job.name === ("master-build")
                         )
                     }).map(job => {
                         return {
@@ -69,7 +73,7 @@ exports.handler = (_, context, callback) => {
                             date: new Date(job.finished_build.end_time)
                         }
                     });
-                    Firebase.database().ref("develop_build_statuses").child(`${repo_name}`)
+                    Firebase.database().ref("build_statuses").child(`${repo_name}`)
                         .set(developBuilds)
                         .then(function (developBuilds) {
                             resolve();
