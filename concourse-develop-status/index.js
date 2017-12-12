@@ -44,7 +44,7 @@ exports.handler = (event, context, callback) => {
             }).map(job => {
                 return {
                     status: job.finished_build.status,
-                    name: job.name,
+                    name: job.name.replace('-build', ''),
                     date: new Date(job.finished_build.end_time)
                 }
             });
