@@ -2,6 +2,8 @@
 
 const Firebase = require('firebase');
 const fetch = require("fetch").fetchUrl;
+const isDevelop = process.env.BUILD === "dev";
+const concourseDomain = isDevelop ? "concourse.onsdigital.co.uk" : "172.31.45.62";
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_KEY,
@@ -11,12 +13,14 @@ const firebaseConfig = {
 const fetchOptions = { 
     method: 'GET',
     mode: 'cors',
-    cache: 'default' 
+    cache: 'default',
+    timeout: 3000,
+    rejectUnauthorized: false
 };
 
 const getBuilds = (name) => {
     return new Promise((resolve, reject) => {
-        const url = `https://concourse.onsdigital.co.uk/api/v1/teams/main/pipelines/${name}/jobs`;
+        const url = `https://${concourseDomain}/api/v1/teams/main/pipelines/${name}/jobs`;
         console.log("Fetching for URL: ", url);
         fetch(url, fetchOptions, (error, _, response) => {
             if (error) {
@@ -35,6 +39,7 @@ exports.handler = (event, context, callback) => {
 
     event.repos.forEach(repo_name => {
         getBuilds(repo_name).then(response => {
+            console.log("Received response for: " + repo_name);
             const developBuilds = response.filter(job => {
                 return (
                     job.name === ("cmd-develop-build")
@@ -59,6 +64,7 @@ exports.handler = (event, context, callback) => {
                 });
         }).catch(error => {
             console.log("Error fetching releases", error);
+            context.fail();
         });
     })
 }
