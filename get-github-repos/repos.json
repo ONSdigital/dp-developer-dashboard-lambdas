@@ -2,6 +2,11 @@
     "repos": [
         "florence",
         "babbage",
-        "zebedee"
+        "zebedee",
+        "sixteens",
+        "dp-frontend-render",
+        "dp-frontend-router",
+        "dp-frontend-dataset-controller",
+        "dp-frontend-filter-dataset-controller"
     ]
 }
