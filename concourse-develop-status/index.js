@@ -37,34 +37,40 @@ exports.handler = (event, context, callback) => {
         Firebase.initializeApp(firebaseConfig);
     }
 
-    event.repos.forEach(repo_name => {
-        getBuilds(repo_name).then(response => {
-            console.log("Received response for: " + repo_name);
-            const developBuilds = response.filter(job => {
-                return (
-                    job.name === ("cmd-develop-build")
-                    ||
-                    job.name === ("develop-build")
-                )
-            }).map(job => {
-                return {
-                    status: job.finished_build.status,
-                    name: job.name.replace('-build', ''),
-                    date: new Date(job.finished_build.end_time)
-                }
-            });
-            Firebase.database().ref("develop_build_statuses").child(`${repo_name}`)
-                .set(developBuilds)
-                .then(function (developBuilds) {
-                    context.succeed();                  // important that you don't call succeed until you are called back otherwise nothing will be saved to the database!
-                })
-                .catch(function (error) {
-                    console.log('Firebase error: ', error);
-                    context.fail();
+
+    const getAllBuilds = event.repos.map(repo_name => {
+        return new Promise((resolve, reject) => {
+            getBuilds(repo_name).then(response => {
+                console.log("Received response for: " + repo_name);
+                const developBuilds = response.filter(job => {
+                    return (
+                        job.name === ("cmd-develop-build")
+                        ||
+                        job.name === ("develop-build")
+                    )
+                }).map(job => {
+                    return {
+                        status: job.finished_build.status,
+                        name: job.name.replace('-build', ''),
+                        date: new Date(job.finished_build.end_time)
+                    }
                 });
-        }).catch(error => {
-            console.log("Error fetching releases", error);
-            context.fail();
-        });
-    })
+                Firebase.database().ref("develop_build_statuses").child(`${repo_name}`)
+                    .set(developBuilds)
+                    .then(function (developBuilds) {
+                        resolve();
+                    })
+                    .catch(function (error) {
+                        console.log('Firebase error: ', error);
+                        reject(error);
+                    });
+            });
+        })
+    });
+
+    Promise.all(getAllBuilds).then(responses => {
+        context.succeed();
+    }).catch(error => {
+        context.fail();
+    });
 }
