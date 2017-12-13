@@ -4,9 +4,25 @@
         "babbage",
         "zebedee",
         "sixteens",
+        "ermintrude",
         "dp-frontend-renderer",
         "dp-frontend-router",
         "dp-frontend-dataset-controller",
-        "dp-frontend-filter-dataset-controller"
+        "dp-frontend-filter-dataset-controller",
+        "dp-import-tracker",
+        "dp-dimension-extractor",
+        "dp-dimension-importer",
+        "dp-observation-extractor",
+        "dp-observation-importer",
+        "dp-import-api",
+        "dp-code-list-api",
+        "dp-dataset-api",
+        "dp-filter-api",
+        "dp-import-reporter",
+        "dp-recipe-api",
+        "dp-dataset-exporter",
+        "dp-dataset-exporter-xlsx",
+        "dp-hierarchy-api",
+        "dp-hierarchy-builder"
     ]
 }
