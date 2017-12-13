@@ -35,7 +35,7 @@ const getBuilds = (name) => {
 
 const getReposConfig = () => {
     return new Promise((resolve, reject) => {
-        console.log("Fetching repos: ", reposURL);
+        console.info("Fetching repos: ", reposURL);
         fetch(reposURL, fetchOptions, (error, _, response) => {
             if (error) {
                 reject(error);
@@ -55,17 +55,18 @@ exports.handler = (_, context, callback) => {
         const getAllBuilds = repos.map(repo_name => {
             return new Promise((resolve, reject) => {
                 getBuilds(repo_name).then(response => {
-                    console.log("Received response for: " + repo_name);
+                    console.info("Received response for: " + repo_name);
                     const developBuilds = response.filter(job => {
-                        return (
-                            job.name === ("cmd-develop-build")
-                            ||
-                            job.name === ("develop-build")
-                            ||
-                            job.name === ("cmd-master-build")
-                            ||
-                            job.name === ("master-build")
-                        )
+                        // Build has never successfully built
+                        if (!job.finished_build) {
+                            return false;
+                        }
+
+                        // Return cmd/production develop or master branches
+                        if ((job.name).match(/^(cmd-)?(master|develop)-build$/)) {
+                            console.info("Build data for: " + repo_name + "(" + job.name + ")");
+                            return true
+                        }
                     }).map(job => {
                         return {
                             status: job.finished_build.status,
@@ -79,7 +80,7 @@ exports.handler = (_, context, callback) => {
                             resolve();
                         })
                         .catch(function (error) {
-                            console.log('Firebase error: ', error);
+                            console.error('Firebase error: ', error);
                             reject(error);
                         });
                 });
