@@ -4,7 +4,7 @@
         "babbage",
         "zebedee",
         "sixteens",
-        "dp-frontend-render",
+        "dp-frontend-renderer",
         "dp-frontend-router",
         "dp-frontend-dataset-controller",
         "dp-frontend-filter-dataset-controller"
