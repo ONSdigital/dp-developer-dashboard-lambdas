@@ -15,7 +15,7 @@ const fetchOptions = {
     method: 'GET',
     mode: 'cors',
     cache: 'default',
-    timeout: 3000,
+    timeout: 5000,
     rejectUnauthorized: false
 };
 
@@ -62,17 +62,28 @@ exports.handler = (_, context, callback) => {
                             return false;
                         }
 
+                        // Return status that are of interest to us
+                        if (job.finished_build.status === "started" || job.finished_build.status === "paused" || job.finished_build.status === "pending") {
+                            console.info("Build data for: " + repo_name + "(" + job.name + ") - " + job.finished_build.status);
+                            return true;
+                        }
+
                         // Return cmd/production develop or master branches
-                        if ((job.name).match(/^(cmd-)?(master|develop)-build$/)) {
+                        if ((job.name).match(/^(cmd-)?(master|develop)/)) {
                             console.info("Build data for: " + repo_name + "(" + job.name + ")");
                             return true
                         }
+                        
+                        return false;
                     }).map(job => {
+                        const jobNameParts = job.name.split('-');
                         return {
                             status: job.finished_build.status,
-                            name: job.name.replace('-build', ''),
-                            date: new Date(job.finished_build.end_time)
-                        }
+                            name: jobNameParts.slice(0, -1).join(" "),
+                            type: jobNameParts[jobNameParts.length-1],
+                            date: new Date(job.finished_build.end_time),
+                            id: job.finished_build.id
+                        };
                     });
                     Firebase.database().ref("build_statuses").child(`${repo_name}`)
                         .set(developBuilds)
@@ -83,6 +94,8 @@ exports.handler = (_, context, callback) => {
                             console.error('Firebase error: ', error);
                             reject(error);
                         });
+                }).catch(error => {
+                    console.error("Error getting build: ", error);
                 });
             })
         });
