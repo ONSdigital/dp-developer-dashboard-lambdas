@@ -14,14 +14,14 @@ const fetchOptions = {
     cache: 'default' 
 };
 
-const getReleases = (date, isUpcoming) => {
+const getReleases = (date, isUpcoming = false) => {
     const fromDate = date;
     const toDate = new Date(date.getTime() + (24 * 60 * 60 * 1000));
     const fromDateParams = `fromDateDay=${fromDate.getDate()}&fromDateMonth=${fromDate.getMonth()+1}&fromDateYear=${fromDate.getFullYear()}`;
     const toDateParams = `toDateDay=${toDate.getDate()}&toDateMonth=${toDate.getMonth()+1}&toDateYear=${toDate.getFullYear()}`;
 
     return new Promise((resolve, reject) => {
-        const url = `https://www.ons.gov.uk/releasecalendar/data?${fromDateParams}&${toDateParams}&view=upcoming`;
+        const url = `https://www.ons.gov.uk/releasecalendar/data?${fromDateParams}&${toDateParams}${isUpcoming ? "&view=upcoming" : ""}`;
         console.log("Fetching for URL: ", url);
         fetch(url, fetchOptions, (error, _, response) => {
             if (error) {
@@ -41,6 +41,7 @@ exports.handler = (_, context, callback) => {
     const todaysDate = new Date();
     const tomorrowsDate = new Date(todaysDate.getTime() + (24 * 60 * 60 * 1000));
     const todaysReleases = getReleases(todaysDate);
+    const todaysUpcomingReleases = getReleases(todaysDate, true);
     const tomorrowsReleases = getReleases(tomorrowsDate, true);
 
     function mapResponseToRelease(response) {
@@ -60,15 +61,21 @@ exports.handler = (_, context, callback) => {
         }
     }
 
-    Promise.all([todaysReleases, tomorrowsReleases]).then(responses => {
+    Promise.all([todaysReleases, todaysUpcomingReleases, tomorrowsReleases]).then(responses => {
         const releases = {
+            updated_on: todaysDate.toString(),
             today: responses[0].result.results.map(release => {
                 return mapResponseToRelease(release)
             }),
-            tomorrow: responses[1].result.results.map(release => {
+            tomorrow: responses[2].result.results.map(release => {
                 return mapResponseToRelease(release)
             })
         };
+
+        responses[1].result.results.forEach(release => {
+            releases.today.push(mapResponseToRelease(release));
+        });
+
         Firebase.database().ref().child("releases")
             .set(releases)
             .then(function (releases) {
