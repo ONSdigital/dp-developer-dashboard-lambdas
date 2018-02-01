@@ -15,7 +15,7 @@ const fetchOptions = {
     method: 'GET',
     mode: 'cors',
     cache: 'default',
-    timeout: 5000,
+    timeout: 10000,
     rejectUnauthorized: false
 };
 
@@ -57,14 +57,14 @@ exports.handler = (_, context, callback) => {
                 getBuilds(repo_name).then(response => {
                     console.info("Received response for: " + repo_name);
                     const developBuilds = response.filter(job => {
-                        // Build has never successfully built
-                        if (!job.finished_build) {
+                        // Build has never successfully built or is building
+                        if (!job.finished_build && !job.next_build) {
                             return false;
                         }
 
                         // Return status that are of interest to us
-                        if (job.finished_build.status === "started" || job.finished_build.status === "paused" || job.finished_build.status === "pending") {
-                            console.info("Build data for: " + repo_name + "(" + job.name + ") - " + job.finished_build.status);
+                        if (job.next_build && (job.next_build.status === "started" || job.next_build.status === "paused" || job.next_build.status === "pending")) {
+                            console.info("Build data for: " + repo_name + "(" + job.name + ") - " + job.next_build.status);
                             return true;
                         }
 
@@ -78,11 +78,11 @@ exports.handler = (_, context, callback) => {
                     }).map(job => {
                         const jobNameParts = job.name.split('-');
                         return {
-                            status: job.finished_build.status,
+                            status: job.finished_build ? job.finished_build.status : job.next_build.status,
                             name: jobNameParts.slice(0, -1).join(" "),
                             type: jobNameParts[jobNameParts.length-1],
-                            date: new Date(job.finished_build.end_time),
-                            id: job.finished_build.id
+                            updated_on: new Date().toISOString(),
+                            id: job.finished_build ? job.finished_build.id : job.next_build.id
                         };
                     });
                     Firebase.database().ref("build_statuses").child(`${repo_name}`)
