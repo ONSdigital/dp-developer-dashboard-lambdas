@@ -57,7 +57,7 @@ exports.handler = (_, context, callback) => {
                 getBuilds(repo_name).then(response => {
                     console.info("Received response for: " + repo_name);
                     const developBuilds = response.filter(job => {
-                        // Build has never successfully built or is building
+                        // Build has never successfully built and isn't building at the moment
                         if (!job.finished_build && !job.next_build) {
                             return false;
                         }
@@ -78,7 +78,7 @@ exports.handler = (_, context, callback) => {
                     }).map(job => {
                         const jobNameParts = job.name.split('-');
                         return {
-                            status: job.finished_build ? job.finished_build.status : job.next_build.status,
+                            status: job.next_build ? job.next_build.status : job.finished_build.status,
                             name: jobNameParts.slice(0, -1).join(" "),
                             type: jobNameParts[jobNameParts.length-1],
                             updated_on: new Date().toISOString(),
