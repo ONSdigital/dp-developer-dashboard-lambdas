@@ -1,0 +1,25 @@
+{
+  "name": "google-analytics",
+  "version": "1.0.0",
+  "description": "Lambda function for getting Google Analytics data into Firebase DB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lambda": "lambda-local -l index.js -e event.json -t 30",
+    "encrypt-ga-creds": "node encrypt-auth.js",
+    "decrypt-ga-creds": "node decrypt-auth.js"
+  },
+  "author": "Crispin Merriman",
+  "license": "ISC",
+  "dependencies": {
+    "crypto-js": "^3.1.9-1",
+    "crypto-json": "^2.0.0",
+    "firebase": "^4.11.0",
+    "fs": "0.0.1-security",
+    "googleapis": "^26.0.1",
+    "node-fetch": "^2.1.1"
+  },
+  "devDependencies": {
+    "lambda-local": "^1.4.6"
+  }
+}
