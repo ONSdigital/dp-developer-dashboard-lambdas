@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lambda": "lambda-local -l index.js -e event.json -t 30",
+    "lambda": "lambda-local -l index.js -e event.json -t 70",
     "encrypt": "node encrypt-auth.js",
     "decrypt": "node decrypt-auth.js"
   },
