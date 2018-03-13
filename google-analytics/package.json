@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lambda": "lambda-local -l index.js -e event.json -t 30",
-    "encrypt-ga-creds": "node encrypt-auth.js",
-    "decrypt-ga-creds": "node decrypt-auth.js"
+    "encrypt": "node encrypt-auth.js",
+    "decrypt": "node decrypt-auth.js"
   },
   "author": "Crispin Merriman",
   "license": "ISC",
