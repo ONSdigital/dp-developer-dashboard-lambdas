@@ -21,7 +21,14 @@ const loadCredentials = new Promise((resolve, reject) => {
     }
 
     const encryptedAuthFile = fetch(authFilePath)
-        .then(response => response.text())
+        .then(response => {
+            if (!response.ok) {
+                console.error(response.status);
+                reject(response.statusText);
+                return;
+            }
+            return response.text();
+        })
         .then(body => {
         const decryptedBytes = crypto.AES.decrypt(body, authKey);
         const decryptedJSON = JSON.parse(decryptedBytes.toString(crypto.enc.Utf8));
@@ -37,10 +44,15 @@ const loadCredentials = new Promise((resolve, reject) => {
     });
 });
 
-const activeUsersUpdate = (context, options) => {
+const activeUsersUpdate = (context, options, count) => {
     analytics.data.realtime.get(options, (error, response) => {
-        activeUsersUpdateCounter++;
+        console.log("Got response from analytics API (" + count + ")")
+        if (error) {
+            context.fail(error);
+            return;
+        }
         let activeUsers = response.data.totalsForAllResults['rt:activeUsers'];
+        console.log("Got realtime active users (" + activeUsers + ")");
 
         try {
             activeUsers = parseInt(activeUsers);
@@ -53,11 +65,7 @@ const activeUsersUpdate = (context, options) => {
         Firebase.database().ref("analytics").child('active_users')
             .set(activeUsers)
             .then(() => {
-                if (activeUsersUpdateCounter >= 6) {
-                    context.succeed();
-                    return; 
-                }
-                timer(context, options);
+                timer(context, options, count);
             })
             .catch(error => {
                 console.error('Firebase error: ', error);
@@ -67,10 +75,14 @@ const activeUsersUpdate = (context, options) => {
 }
 
 const timerDelay = 10000;
-let activeUsersUpdateCounter = 0;
-const timer = (context, options) => {
+const timer = (context, options, count) => {
+    count++
+    if (count > 6) {
+        context.succeed();
+        return;
+    }
     setTimeout(() => {
-        activeUsersUpdate(context, options);
+        activeUsersUpdate(context, options, count);
     }, timerDelay);
 }
 
@@ -91,7 +103,7 @@ exports.handler = (_, context, callback) => {
                 ids: 'ga:' + gaTableID,
                 metrics: 'rt:activeUsers'
             }
-            timer(context, options);
+            activeUsersUpdate(context, options, 1);
         });
     }).catch(error => {
         context.fail(error);
