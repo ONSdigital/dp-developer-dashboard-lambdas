@@ -4,7 +4,7 @@
 
 ## Development
 
-To develop and run the lambda function locally: 
+To develop and run the lambda function locally:
 
 1) Install the dependencies:
 ```
@@ -12,5 +12,5 @@ npm install
 ```
 2) Run the function:
 ```
-FIREBASE_KEY=<firebase api key> FIREBASE_DB_NAME=<firebase db name> BUILD=dev npm run lambda
+FIREBASE_KEY=<firebase api key> FIREBASE_DB_NAME=<firebase db name> CONCOURSE_DOMAIN=<concourse_domain> npm run lambda
 ```

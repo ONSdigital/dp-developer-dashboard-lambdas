@@ -2,8 +2,7 @@
 
 const Firebase = require('firebase');
 const fetch = require("fetch").fetchUrl;
-const isDevelop = process.env.BUILD === "dev";
-const concourseDomain = isDevelop ? "concourse.onsdigital.co.uk" : "172.31.45.62";
+const concourseDomain = process.env.CONCOURSE_DOMAIN;
 const reposURL = "https://raw.githubusercontent.com/ONSdigital/dp-developer-dashboard-lambdas/master/get-github-repos/repos.json";
 
 const firebaseConfig = {
@@ -11,7 +10,7 @@ const firebaseConfig = {
     databaseURL: "https://" + process.env.FIREBASE_DB_NAME + ".firebaseio.com"
 };
 
-const fetchOptions = { 
+const fetchOptions = {
     method: 'GET',
     mode: 'cors',
     cache: 'default',
@@ -69,11 +68,11 @@ exports.handler = (_, context, callback) => {
                         }
 
                         // Return cmd/production develop or master branches
-                        if ((job.name).match(/^(cmd-)?(master|develop)/)) {
+                        if ((job.name).match(/^(master-|develop-|release$|rc$|.+-ship-it$)/)) {
                             console.info("Build data for: " + repo_name + "(" + job.name + ")");
                             return true
                         }
-                        
+
                         return false;
                     }).map(job => {
                         const jobNameParts = job.name.split('-');
@@ -99,7 +98,7 @@ exports.handler = (_, context, callback) => {
                 });
             })
         });
-    
+
         Promise.all(getAllBuilds).then(responses => {
             context.succeed();
         }).catch(error => {
