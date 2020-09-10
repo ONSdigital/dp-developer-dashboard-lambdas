@@ -17,7 +17,7 @@
     "firebase": "^4.11.0",
     "fs": "0.0.1-security",
     "googleapis": "^26.0.1",
-    "node-fetch": "^2.1.1"
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "lambda-local": "^1.4.6"
